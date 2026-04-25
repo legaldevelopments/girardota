@@ -108,10 +108,12 @@ def cargar():
     for c in ["AVALUO_TOTAL_2025","AVALUO_TOTAL_2026","AVALUO_DER_TOTAL_2026",
               "IMPTO_TOTAL_2025","LIQ_BRUTA_2026","IMPTO_GESTOR_2026",
               "LIMITE_LEY44","IMPTO_CORRECTO_2026","EXCESO_GESTOR","AHORRO_CONTRIB",
+              "LIMITE_LOCAL","IMPTO_LOCAL","EXCESO_LOCAL","AHORRO_LOCAL",
               "VAR_AVALUO_PCT","VAR_IMPTO_PCT","TARIFA_2025_MIL","TARIFA_2026_MIL"]:
         if c in df.columns:
             df[c] = pd.to_numeric(df[c], errors="coerce")
 
+    df["_aplica_local"] = df["APLICA_LIMITE_LOCAL"].astype(str).str.strip().str.upper() == "SÍ"
     df["DEST_NOM_2026"] = df["DEST_NOM_2026"].fillna("Sin destino")
     df["RANGO_AVALUO_2026"] = df["RANGO_AVALUO_2026"].fillna("Sin dato")
 
@@ -231,8 +233,24 @@ kpi(cols_kpi[1], fmt_cop(i25),         "Recaudo 2025",            "Sistema infor
 kpi(cols_kpi[2], fmt_cop(ig26),        "Recaudo Gestor 2026",     "Tal como está en txt",  "ambar")
 kpi(cols_kpi[3], fmt_cop(ic26),        "Recaudo Correcto 2026",   "Con límite Ley44",      "verde")
 kpi(cols_kpi[4], f"{var_g:+.1f}%",    "Var. Gestor vs 2025",     "Sin aplicar Ley44",     "rojo" if var_g > 13.2 else "verde")
-kpi(cols_kpi[5], f"{n_viol:,}",       "Predios Excedieron",      "Liq. inicial (Excedio Ley44)", "rojo")
+kpi(cols_kpi[5], f"{n_viol:,}",       "Predios Excedieron",      "Excedió Ley44",         "rojo")
 kpi(cols_kpi[6], fmt_cop(exceso),      "Exceso Cobrado",          "Monto liq. inicial",    "naranja")
+st.markdown("<br>", unsafe_allow_html=True)
+
+# KPIs Acuerdo 49
+n_loc    = int(df["_aplica_local"].sum())
+exc_loc  = df["EXCESO_LOCAL"].fillna(0).sum()
+ahor_loc = df["AHORRO_LOCAL"].fillna(0).sum()
+n_loc25  = int((df["TIPO_LIMITE_LOCAL"] == "25%").sum()) if "TIPO_LIMITE_LOCAL" in df.columns else 0
+n_loc50  = int((df["TIPO_LIMITE_LOCAL"] == "50%").sum()) if "TIPO_LIMITE_LOCAL" in df.columns else 0
+
+st.markdown('<div class="sec-tit">🏛️ Límites Acuerdo 49</div>', unsafe_allow_html=True)
+cols_loc = st.columns(5)
+kpi(cols_loc[0], f"{n_loc:,}",       "Predios Acuerdo 49",  "Sin cambio dest/área",  "oscuro")
+kpi(cols_loc[1], f"{n_loc25:,}",     "Dest 01/24 — Límite 25%", "Habitacional/Agrícola","ambar")
+kpi(cols_loc[2], f"{n_loc50:,}",     "Otros — Límite 50%",    "Dentro de Ley44",       "ambar")
+kpi(cols_loc[3], fmt_cop(exc_loc),   "Exceso s/ Acuerdo 49", "Gestor vs límite Acuerdo 49","naranja")
+kpi(cols_loc[4], fmt_cop(ahor_loc),  "Ahorro Contribuyente",   "Con Acuerdo 49",      "verde")
 st.markdown("<br>", unsafe_allow_html=True)
 
 
@@ -615,8 +633,10 @@ cols_vis = [c for c in [
     "TARIFA_2025_MIL","TARIFA_2026_MIL",
     "IMPTO_TOTAL_2025","IMPTO_GESTOR_2026",
     "APLICA_LIMITE","LIMITE_LEY44",
-    "GESTOR_VIOLO_LIMITE","IMPTO_CORRECTO_2026",
+    "LIQUIDACION_INICIAL","IMPTO_CORRECTO_2026",
     "EXCESO_GESTOR","AHORRO_CONTRIB","VAR_IMPTO_PCT",
+    "APLICA_LIMITE_LOCAL","TIPO_LIMITE_LOCAL","LIMITE_LOCAL",
+    "IMPTO_LOCAL","EXCESO_LOCAL","AHORRO_LOCAL",
     "RANGO_AVALUO_2026","NOVEDADES",
 ] if c in df.columns]
 
@@ -633,7 +653,8 @@ st.markdown(f"**{len(df_vis):,}** registros")
 col_cfg_vis = {}
 for c in ["AVALUO_TOTAL_2025","AVALUO_TOTAL_2026","IMPTO_TOTAL_2025",
           "IMPTO_GESTOR_2026","LIMITE_LEY44","IMPTO_CORRECTO_2026",
-          "EXCESO_GESTOR","AHORRO_CONTRIB"]:
+          "EXCESO_GESTOR","AHORRO_CONTRIB",
+          "LIMITE_LOCAL","IMPTO_LOCAL","EXCESO_LOCAL","AHORRO_LOCAL"]:
     if c in cols_vis:
         col_cfg_vis[c] = st.column_config.NumberColumn(c, format="$ %,.0f")
 for c in ["VAR_AVALUO_PCT","VAR_IMPTO_PCT"]:
