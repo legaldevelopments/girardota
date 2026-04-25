@@ -246,7 +246,7 @@ with c1:
         y=[i25, ig26, ic26],
         marker_color=[AZUL_MED, ROJO if ig26 > ic26 else AMBAR, VERDE],
         text=[fmt_cop(v) for v in [i25, ig26, ic26]],
-        textposition="outside", textfont=dict(size=11, color=AZUL_OSC),
+        textposition="outside", textfont=dict(size=11, color="black"),
     ))
     fig_bar.update_layout(
         title=dict(text="Comparativo Recaudo ($)", font=dict(size=13, color=AZUL_OSC)),
