@@ -101,7 +101,7 @@ def cargar():
     # Columnas booleanas seguras
     def yn(col): return df[col].astype(str).str.strip().str.upper() == "SÍ"
     df["_aplica"]     = yn("APLICA_LIMITE")
-    df["_violo"]      = yn("GESTOR_VIOLO_LIMITE")
+    df["_violo"]      = yn("LIQUIDACION_INICIAL")
     df["_tiene_hist"] = df["IMPTO_TOTAL_2025"].fillna(0) > 0
 
     # Columnas numéricas seguras
@@ -231,8 +231,8 @@ kpi(cols_kpi[1], fmt_cop(i25),         "Recaudo 2025",            "Sistema infor
 kpi(cols_kpi[2], fmt_cop(ig26),        "Recaudo Gestor 2026",     "Tal como está en txt",  "ambar")
 kpi(cols_kpi[3], fmt_cop(ic26),        "Recaudo Correcto 2026",   "Con límite Ley44",      "verde")
 kpi(cols_kpi[4], f"{var_g:+.1f}%",    "Var. Gestor vs 2025",     "Sin aplicar Ley44",     "rojo" if var_g > 13.2 else "verde")
-kpi(cols_kpi[5], f"{n_viol:,}",       "Predios Excedieron",      "Gestor violó Ley44",    "rojo")
-kpi(cols_kpi[6], fmt_cop(exceso),      "Exceso Cobrado",          "Monto que viola Ley44", "naranja")
+kpi(cols_kpi[5], f"{n_viol:,}",       "Predios Excedieron",      "Liq. inicial (violó Ley44)", "rojo")
+kpi(cols_kpi[6], fmt_cop(exceso),      "Exceso Cobrado",          "Monto liq. inicial",    "naranja")
 st.markdown("<br>", unsafe_allow_html=True)
 
 
@@ -370,7 +370,7 @@ with c6:
             text=[fmt_cop(v) for v in df_viol_dest["exceso"]], textposition="outside",
         ))
         fig_vd.update_layout(
-            title=dict(text="Exceso Cobrado por Destino (Violación Ley44)", font=dict(size=13,color=AZUL_OSC)),
+            title=dict(text="Exceso Cobrado por Destino (Liquidación inicial)", font=dict(size=13,color=AZUL_OSC)),
             plot_bgcolor="white", paper_bgcolor="white",
             xaxis=dict(tickformat="$,.0f", showgrid=True, gridcolor="#eee"),
             margin=dict(t=50,b=20,l=10,r=80), height=340,
@@ -503,7 +503,7 @@ with tab3:
 
 
 # ── SECCIÓN 6: CAMBIOS EXTREMOS ──────────────────────────────────────────────
-st.markdown(f'<div class="sec-tit">🚨 Predios con Cambios Extremos (Avalúo ≥ {umbral_av}% o Violó Ley44)</div>',
+st.markdown(f'<div class="sec-tit">🚨 Predios con Cambios Extremos (Avalúo ≥ {umbral_av}% o Liquidación inicial)</div>',
             unsafe_allow_html=True)
 
 df_ext = df[
@@ -514,7 +514,7 @@ n_ext = len(df_ext)
 n_ext_viol = int(df_ext["_violo"].sum())
 st.markdown(
     f"**{n_ext:,}** predios con cambio extremo · "
-    f"de estos **{n_ext_viol:,}** además violaron el límite Ley44."
+    f"de estos **{n_ext_viol:,}** con liquidación inicial."
 )
 
 if len(df_ext) > 0:
@@ -541,7 +541,7 @@ if len(df_ext) > 0:
 cols_ext = [c for c in [
     "FICHA","ZONA","DEST_NOM_2026","AVALUO_TOTAL_2025","AVALUO_TOTAL_2026",
     "VAR_AVALUO_PCT","IMPTO_TOTAL_2025","IMPTO_GESTOR_2026",
-    "LIMITE_LEY44","GESTOR_VIOLO_LIMITE","EXCESO_GESTOR","IMPTO_CORRECTO_2026"
+    "LIMITE_LEY44","LIQUIDACION_INICIAL","EXCESO_GESTOR","IMPTO_CORRECTO_2026"
 ] if c in df_ext.columns]
 
 col_cfg_ext = {}
@@ -568,7 +568,7 @@ df_res_dest = (
     .agg(
         N_Predios=("FICHA","count"),
         Aplica_Limite=("_aplica","sum"),
-        Violo_Limite=("_violo","sum"),
+        Liq_Inicial=("_violo","sum"),
         Sin_Historial=("_tiene_hist", lambda x: (~x).sum()),
         Avaluo_2025=("AVALUO_TOTAL_2025","sum"),
         Avaluo_2026=("AVALUO_TOTAL_2026","sum"),
@@ -579,7 +579,7 @@ df_res_dest = (
         Ahorro_Contrib=("AHORRO_CONTRIB","sum"),
     )
     .reset_index()
-    .sort_values(["ZONA","Violo_Limite"], ascending=[True, False])
+    .sort_values(["ZONA","Liq_Inicial"], ascending=[True, False])
 )
 
 df_res_dest["Var_Impto_%"] = (
@@ -587,8 +587,8 @@ df_res_dest["Var_Impto_%"] = (
     / df_res_dest["Impto_2025"].replace(0, np.nan) * 100
 ).round(2)
 
-df_res_dest["Pct_Violaron"] = (
-    df_res_dest["Violo_Limite"] / df_res_dest["Aplica_Limite"].replace(0, np.nan) * 100
+df_res_dest["Pct_Liq_Inicial"] = (
+    df_res_dest["Liq_Inicial"] / df_res_dest["Aplica_Limite"].replace(0, np.nan) * 100
 ).round(1)
 
 col_cfg_res = {}
@@ -596,7 +596,7 @@ for c in ["Avaluo_2025","Avaluo_2026","Impto_2025","Impto_Gestor_2026",
           "Impto_Correcto_2026","Exceso_Gestor","Ahorro_Contrib"]:
     col_cfg_res[c] = st.column_config.NumberColumn(c, format="$ %,.0f")
 col_cfg_res["Var_Impto_%"] = st.column_config.NumberColumn("Var_Impto_%", format="%.2f %%")
-col_cfg_res["Pct_Violaron"] = st.column_config.NumberColumn("% que violaron", format="%.1f %%")
+col_cfg_res["Pct_Liq_Inicial"] = st.column_config.NumberColumn("% liq. inicial", format="%.1f %%")
 
 st.dataframe(df_res_dest.reset_index(drop=True), use_container_width=True,
              height=380, column_config=col_cfg_res)
@@ -666,4 +666,5 @@ st.markdown(
     "Municipio de Girardota · Predial 2026 · Ley 44/1990 · Ley 1995/2019"
     "</center>", unsafe_allow_html=True,
 )
+
 
