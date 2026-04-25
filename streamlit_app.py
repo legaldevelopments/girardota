@@ -200,8 +200,7 @@ else:
 # ── HELPERS ───────────────────────────────────────────────────────────────────
 def fmt_cop(v):
     if pd.isna(v): return "$0"
-    if abs(v) >= 1e9: return f"${v/1e9:.2f} B"
-    if abs(v) >= 1e6: return f"${v/1e6:.1f} M"
+    if abs(v) >= 1e6: return f"${v/1e6:,.0f} M"
     return f"${v:,.0f}"
 
 def kpi(col, val, lab, sub="", color=""):
