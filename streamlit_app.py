@@ -113,7 +113,10 @@ def cargar():
         if c in df.columns:
             df[c] = pd.to_numeric(df[c], errors="coerce")
 
-    df["_aplica_local"] = df["APLICA_LIMITE_LOCAL"].astype(str).str.strip().str.upper() == "SÍ"
+    if "APLICA_LIMITE_LOCAL" in df.columns:
+        df["_aplica_local"] = df["APLICA_LIMITE_LOCAL"].astype(str).str.strip().str.upper() == "SÍ"
+    else:
+        df["_aplica_local"] = False
     df["DEST_NOM_2026"] = df["DEST_NOM_2026"].fillna("Sin destino")
     df["RANGO_AVALUO_2026"] = df["RANGO_AVALUO_2026"].fillna("Sin dato")
 
@@ -239,8 +242,8 @@ st.markdown("<br>", unsafe_allow_html=True)
 
 # KPIs Acuerdo 49
 n_loc    = int(df["_aplica_local"].sum())
-exc_loc  = df["EXCESO_LOCAL"].fillna(0).sum()
-ahor_loc = df["AHORRO_LOCAL"].fillna(0).sum()
+exc_loc  = df["EXCESO_LOCAL"].fillna(0).sum()  if "EXCESO_LOCAL"       in df.columns else 0
+ahor_loc = df["AHORRO_LOCAL"].fillna(0).sum()  if "AHORRO_LOCAL"       in df.columns else 0
 n_loc25  = int((df["TIPO_LIMITE_LOCAL"] == "25%").sum()) if "TIPO_LIMITE_LOCAL" in df.columns else 0
 n_loc50  = int((df["TIPO_LIMITE_LOCAL"] == "50%").sum()) if "TIPO_LIMITE_LOCAL" in df.columns else 0
 
