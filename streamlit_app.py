@@ -666,3 +666,4 @@ st.markdown(
     "Municipio de Girardota · Predial 2026 · Ley 44/1990 · Ley 1995/2019"
     "</center>", unsafe_allow_html=True,
 )
+
