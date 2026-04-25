@@ -231,7 +231,7 @@ kpi(cols_kpi[1], fmt_cop(i25),         "Recaudo 2025",            "Sistema infor
 kpi(cols_kpi[2], fmt_cop(ig26),        "Recaudo Gestor 2026",     "Tal como está en txt",  "ambar")
 kpi(cols_kpi[3], fmt_cop(ic26),        "Recaudo Correcto 2026",   "Con límite Ley44",      "verde")
 kpi(cols_kpi[4], f"{var_g:+.1f}%",    "Var. Gestor vs 2025",     "Sin aplicar Ley44",     "rojo" if var_g > 13.2 else "verde")
-kpi(cols_kpi[5], f"{n_viol:,}",       "Predios Excedieron",      "Liq. inicial (violó Ley44)", "rojo")
+kpi(cols_kpi[5], f"{n_viol:,}",       "Predios Excedieron",      "Liq. inicial (Excedio Ley44)", "rojo")
 kpi(cols_kpi[6], fmt_cop(exceso),      "Exceso Cobrado",          "Monto liq. inicial",    "naranja")
 st.markdown("<br>", unsafe_allow_html=True)
 
