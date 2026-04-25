@@ -250,7 +250,8 @@ with c1:
     ))
     fig_bar.update_layout(
         title=dict(text="Comparativo Recaudo ($)", font=dict(size=13, color=AZUL_OSC)),
-        yaxis=dict(tickformat="$,.0f", showgrid=True, gridcolor="#eee"),
+        xaxis=dict(tickfont=dict(color="black")),
+        yaxis=dict(tickformat="$,.0f", showgrid=True, gridcolor="#eee", tickfont=dict(color="black")),
         plot_bgcolor="white", paper_bgcolor="white",
         margin=dict(t=50,b=20,l=10,r=20), height=320, showlegend=False,
     )
@@ -665,4 +666,3 @@ st.markdown(
     "Municipio de Girardota · Predial 2026 · Ley 44/1990 · Ley 1995/2019"
     "</center>", unsafe_allow_html=True,
 )
-
