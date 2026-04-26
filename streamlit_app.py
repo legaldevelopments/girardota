@@ -1,6 +1,6 @@
 """
 Tablero Predial Girardota 2026 — Streamlit
-Análisis de avalúos, tarifas y límites Ley 44 / Ley 1995 de 2019
+Análisis de avalúos, tarifas y límite Ley 44/1990 Art.6 (no más del doble del impuesto anterior)
 Base: Predial_Girardota_2026_Ley44.xlsx (generado por procesar_predial_girardota.py)
 
 Ejecutar: streamlit run tablero_girardota.py
@@ -162,8 +162,7 @@ with st.sidebar:
     Sistema de Información + Gestor Catastral 2026<br><br>
     📋 Marco legal:<br>
     · Ley 44/1990 Art. 6<br>
-    · Ley 1995/2019<br>
-    · IPC 2025 + 8 pp
+    · Límite: doble del impuesto 2025
     </div>""", unsafe_allow_html=True)
 
 
@@ -191,7 +190,7 @@ if sel_rng:
 st.markdown("""
 <div class="header-main">
   <h1>🏛️ Análisis Predial — Municipio de Girardota</h1>
-  <p>Actualización catastral 2026 · Sistema de Información vs Gestor Catastral · Ley 44/1990 · Ley 1995/2019</p>
+  <p>Actualización catastral 2026 · Sistema de Información vs Gestor Catastral · Ley 44/1990 Art.6 · Límite: doble del impuesto 2025</p>
 </div>""", unsafe_allow_html=True)
 
 n_f = len(df); n_t = len(df_all)
@@ -235,7 +234,7 @@ kpi(cols_kpi[0], f"{n_f:,}",          "Total Predios",           sel_zona or "To
 kpi(cols_kpi[1], fmt_cop(i25),         "Recaudo 2025",            "Sistema información",   "")
 kpi(cols_kpi[2], fmt_cop(ig26),        "Recaudo Gestor 2026",     "Tal como está en txt",  "ambar")
 kpi(cols_kpi[3], fmt_cop(ic26),        "Recaudo Correcto 2026",   "Con límite Ley44",      "verde")
-kpi(cols_kpi[4], f"{var_g:+.1f}%",    "Var. Gestor vs 2025",     "Sin aplicar Ley44",     "rojo" if var_g > 13.2 else "verde")
+kpi(cols_kpi[4], f"{var_g:+.1f}%",    "Var. Gestor vs 2025",     "Sin aplicar Ley44",     "rojo" if var_g > 100 else "verde")
 kpi(cols_kpi[5], f"{n_viol:,}",       "Predios Excedieron",      "Excedió Ley44",         "rojo")
 kpi(cols_kpi[6], fmt_cop(exceso),      "Exceso Cobrado",          "Monto liq. inicial",    "naranja")
 st.markdown("<br>", unsafe_allow_html=True)
@@ -333,8 +332,8 @@ with c4:
             title="Distribución Variación de Avalúos (Sistema 2025 → Gestor 2026)",
         )
         fig_hist.add_vline(x=0,   line_dash="dash", line_color=AZUL_OSC, annotation_text="0%")
-        fig_hist.add_vline(x=13.2,line_dash="dot",  line_color=ROJO,
-                           annotation_text="Límite Ley44 ~13.2%")
+        fig_hist.add_vline(x=100, line_dash="dot",  line_color=ROJO,
+                           annotation_text="Límite Ley44 = 100% (doble)")
         fig_hist.update_layout(
             plot_bgcolor="white", paper_bgcolor="white",
             margin=dict(t=50,b=20,l=10,r=10), height=320,
@@ -370,7 +369,7 @@ with c5:
 
 
 # ── SECCIÓN 3: ANÁLISIS LEY 44 ────────────────────────────────────────────────
-st.markdown('<div class="sec-tit">⚖️ Análisis de Cumplimiento Ley 44 / Ley 1995 de 2019</div>',
+st.markdown('<div class="sec-tit">⚖️ Análisis de Cumplimiento Ley 44/1990 Art.6 — Límite: doble del impuesto 2025</div>',
             unsafe_allow_html=True)
 c6, c7 = st.columns(2)
 
@@ -678,7 +677,7 @@ st.download_button("⬇️ Descargar tabla filtrada (.csv)", data=csv_all_bytes,
 # ── NOTA LEGAL ────────────────────────────────────────────────────────────────
 st.markdown("""
 <div class="nota-legal">
-⚖️ <strong>Nota legal:</strong> Límite Ley 44/1990 + Ley 1995/2019 = IMP_2025 × (1 + IPC_2025 + 8pp ≈ 13.2%).
+⚖️ <strong>Nota legal:</strong> Límite Ley 44/1990 Art.6 = IMP_2025 × 2 (el impuesto no puede ser mayor al doble del año anterior).
 No aplica para lotes (destinos 12,13,14) ni uso público (19). Los predios sin impuesto 2025 no
 tienen límite calculable. Los datos están agregados por ficha (total de todos los propietarios).
 Verificar con el Acuerdo Municipal vigente de Girardota y la Resolución DIAN UVT 2026 antes de
@@ -687,8 +686,7 @@ liquidar oficialmente.
 
 st.markdown(
     "<br><center style='color:#aaa; font-size:0.76rem;'>"
-    "Municipio de Girardota · Predial 2026 · Ley 44/1990 · Ley 1995/2019"
+    "Municipio de Girardota · Predial 2026 · Ley 44/1990 Art.6 · Límite: doble del impuesto 2025"
     "</center>", unsafe_allow_html=True,
 )
-
 
