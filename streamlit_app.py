@@ -554,7 +554,7 @@ with tab3:
 
 
 # ── SECCIÓN 6: CAMBIOS EXTREMOS ──────────────────────────────────────────────
-st.markdown(f'<div class="sec-tit">🚨 Predios con Cambios Extremos (Avalúo ≥ {umbral_av}% o Liq. inicial excedió)</div>',
+st.markdown(f'<div class="sec-tit">🚨 Predios con Cambios en (Avalúo ≥ {umbral_av}%)</div>',
             unsafe_allow_html=True)
 
 col_var = "VAR_AVALUO_%"
@@ -582,7 +582,7 @@ if len(df_ext) > 0:
         else:              return "> 1000%"
 
     df_var_valid["_cat_var"] = df_var_valid[col_var].apply(_cat_var)
-    cat_order = [f"Sin cambio extremo (< {umbral_av}%)", f"{umbral_av}–200%", "200–500%", "500–1000%", "> 1000%"]
+    cat_order = [f"Sin cambio (< {umbral_av}%)", f"{umbral_av}–200%", "200–500%", "500–1000%", "> 1000%"]
     cat_counts  = df_var_valid["_cat_var"].value_counts()
     labels_pie  = [c for c in cat_order if c in cat_counts.index]
     values_pie  = [int(cat_counts.get(c, 0)) for c in labels_pie]
