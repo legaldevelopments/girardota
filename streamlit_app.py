@@ -575,7 +575,7 @@ if len(df_ext) > 0:
     df_var_valid = df[df[col_var].notna()].copy()
 
     def _cat_var(v):
-        if v < umbral_av:  return f"Sin cambio extremo (< {umbral_av}%)"
+        if v < umbral_av:  return f"Sin cambio (< {umbral_av}%)"
         elif v < 200:      return f"{umbral_av}–200%"
         elif v < 500:      return "200–500%"
         elif v < 1000:     return "500–1000%"
