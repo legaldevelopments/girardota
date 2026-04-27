@@ -12,6 +12,7 @@ import plotly.graph_objects as go
 import plotly.express as px
 import numpy as np
 import os
+import io
 
 # ── CONFIG ────────────────────────────────────────────────────────────────────
 st.set_page_config(
@@ -290,23 +291,32 @@ with c1:
 
 with c2:
     _fs = df.groupby("FICHA").agg(
-        violo=("_violo","any"), aplica=("_aplica","any"), tiene_hist=("_tiene_hist","any")
+        violo=("_violo","any"), aplica=("_aplica","any"), tiene_hist=("_tiene_hist","any"),
+        aplica_loc=("_aplica_local","any"),
+        exceso_loc=("EXCESO_LOCAL", lambda x: x.fillna(0).sum()),
     ).reset_index()
-    n_violo_v  = int(_fs["violo"].sum())
-    n_ok_v     = int((~_fs["violo"] & _fs["aplica"] & _fs["tiene_hist"]).sum())
-    n_noapl    = int((~_fs["aplica"]).sum())
-    n_pred2026 = int((_fs["aplica"] & ~_fs["tiene_hist"] & ~_fs["violo"]).sum())
+    n_violo_v    = int(_fs["violo"].sum())
+    # dentro de Ley 44 pero excede límite local
+    mask_ok      = ~_fs["violo"] & _fs["aplica"] & _fs["tiene_hist"]
+    n_ok_loc_exc = int((mask_ok & _fs["aplica_loc"] & (_fs["exceso_loc"] > 0)).sum())
+    n_ok_limpio  = int((mask_ok & ~((_fs["aplica_loc"]) & (_fs["exceso_loc"] > 0))).sum())
+    n_noapl      = int((~_fs["aplica"]).sum())
+    n_pred2026   = int((_fs["aplica"] & ~_fs["tiene_hist"] & ~_fs["violo"]).sum())
     fig_pie = go.Figure(go.Pie(
-        labels=["Liq. Inicial Excedió","Dentro del límite","No aplica límite","Predios 2026"],
-        values=[n_violo_v, n_ok_v, n_noapl, n_pred2026],
+        labels=["Liq. Inicial Excedió Ley 44",
+                "Dentro Ley 44, excede límite local",
+                "Dentro de ambos límites",
+                "No aplica límite",
+                "Predios 2026"],
+        values=[n_violo_v, n_ok_loc_exc, n_ok_limpio, n_noapl, n_pred2026],
         hole=0.52,
-        marker_colors=[ROJO, VERDE, AMBAR, GRIS],
-        textinfo="percent+label", textfont=dict(size=9),
+        marker_colors=[ROJO, NARANJA, VERDE, AMBAR, GRIS],
+        textinfo="percent+label", textfont=dict(size=9, color="black"),
         hovertemplate="%{label}: %{value:,}<extra></extra>",
     ))
     fig_pie.update_layout(
-        title=dict(text="Aplicación Límite Ley 44", font=dict(size=13, color=AZUL_OSC)),
-        showlegend=False, margin=dict(t=50,b=0,l=0,r=0), height=320,
+        title=dict(text="Aplicación Límite Ley 44 + Acuerdo 49", font=dict(size=13, color=AZUL_OSC)),
+        showlegend=False, margin=dict(t=50,b=0,l=0,r=0), height=340,
         paper_bgcolor="white",
         annotations=[dict(text=f"<b>{n_f:,}</b><br>predios",
                           x=0.5,y=0.5,font_size=12,showarrow=False,font_color=AZUL_OSC)],
@@ -352,7 +362,9 @@ with c4:
         fig_hist.update_layout(
             plot_bgcolor="white", paper_bgcolor="white",
             margin=dict(t=50,b=20,l=10,r=10), height=320,
-            yaxis_title="N° predios", bargap=0.05,
+            bargap=0.05,
+            xaxis=dict(tickfont=dict(color="black")),
+            yaxis=dict(title="N° predios", tickfont=dict(color="black")),
         )
         st.plotly_chart(fig_hist, use_container_width=True)
 
@@ -377,7 +389,8 @@ with c5:
     fig_dest.update_layout(
         title=dict(text="Recaudo Correcto 2026 por Destino", font=dict(size=13, color=AZUL_OSC)),
         plot_bgcolor="white", paper_bgcolor="white",
-        xaxis=dict(tickformat="$,.0f", showgrid=True, gridcolor="#eee"),
+        xaxis=dict(tickformat="$,.0f", showgrid=True, gridcolor="#eee", tickfont=dict(color="black")),
+        yaxis=dict(tickfont=dict(color="black")),
         margin=dict(t=50,b=20,l=10,r=80), height=320,
     )
     st.plotly_chart(fig_dest, use_container_width=True)
@@ -407,7 +420,8 @@ with c6:
         fig_vd.update_layout(
             title=dict(text="Exceso Liq. Inicial por Destino (vs límite Ley 44)", font=dict(size=13, color=AZUL_OSC)),
             plot_bgcolor="white", paper_bgcolor="white",
-            xaxis=dict(tickformat="$,.0f", showgrid=True, gridcolor="#eee"),
+            xaxis=dict(tickformat="$,.0f", showgrid=True, gridcolor="#eee", tickfont=dict(color="black")),
+            yaxis=dict(tickfont=dict(color="black")),
             margin=dict(t=50,b=20,l=10,r=80), height=340,
         )
         st.plotly_chart(fig_vd, use_container_width=True)
@@ -446,7 +460,8 @@ with c7:
     fig_rng.update_layout(
         title=dict(text="Recaudo por Rango de Avalúo", font=dict(size=13, color=AZUL_OSC)),
         barmode="group", plot_bgcolor="white", paper_bgcolor="white",
-        yaxis=dict(tickformat="$,.0f", showgrid=True, gridcolor="#eee"),
+        yaxis=dict(tickformat="$,.0f", showgrid=True, gridcolor="#eee", tickfont=dict(color="black")),
+        xaxis=dict(tickfont=dict(color="black")),
         legend=dict(orientation="h", yanchor="bottom", y=1.01, xanchor="right", x=1),
         margin=dict(t=60,b=20,l=10,r=10), height=340,
     )
@@ -479,7 +494,8 @@ if len(df_sc) > 0:
         plot_bgcolor="white", paper_bgcolor="white",
         height=380, margin=dict(t=50,b=20,l=10,r=10),
         legend=dict(orientation="h", yanchor="bottom", y=1.01),
-        xaxis=dict(tickformat="$,.0f"), yaxis=dict(tickformat="$,.0f"),
+        xaxis=dict(tickformat="$,.0f", tickfont=dict(color="black")),
+        yaxis=dict(tickformat="$,.0f", tickfont=dict(color="black")),
     )
     fig_sc.update_traces(marker=dict(size=5))
     st.plotly_chart(fig_sc, use_container_width=True)
@@ -554,21 +570,43 @@ st.markdown(
 )
 
 if len(df_ext) > 0:
-    top20 = df_ext.head(20)
-    fig_ext = go.Figure(go.Bar(
-        x=top20[col_var],
-        y=top20["FICHA"].astype(str),
-        orientation="h",
-        marker_color=[ROJO if v else NARANJA for v in top20["_violo"]],
-        text=[f"{v:.1f}%" if pd.notna(v) else "N/A" for v in top20[col_var]],
-        textposition="outside",
+    df_var_valid = df[df[col_var].notna()].copy()
+
+    def _cat_var(v):
+        if v < umbral_av:  return f"Sin cambio extremo (< {umbral_av}%)"
+        elif v < 200:      return f"{umbral_av}–200%"
+        elif v < 500:      return "200–500%"
+        elif v < 1000:     return "500–1000%"
+        else:              return "> 1000%"
+
+    df_var_valid["_cat_var"] = df_var_valid[col_var].apply(_cat_var)
+    cat_order = [f"Sin cambio extremo (< {umbral_av}%)", f"{umbral_av}–200%", "200–500%", "500–1000%", "> 1000%"]
+    cat_counts  = df_var_valid["_cat_var"].value_counts()
+    labels_pie  = [c for c in cat_order if c in cat_counts.index]
+    values_pie  = [int(cat_counts.get(c, 0)) for c in labels_pie]
+    colors_pie  = [GRIS, AMBAR, NARANJA, ROJO, "#8B0000"][:len(labels_pie)]
+    n_extrem    = sum(v for c, v in zip(labels_pie, values_pie) if not c.startswith("Sin"))
+
+    fig_ext = go.Figure(go.Pie(
+        labels=labels_pie,
+        values=values_pie,
+        hole=0.52,
+        marker_colors=colors_pie,
+        textinfo="percent+label",
+        textfont=dict(size=10, color="black"),
+        hovertemplate="%{label}: %{value:,} predios (%{percent})<extra></extra>",
     ))
     fig_ext.update_layout(
-        title=dict(text="Top 20 mayores variaciones de avalúo (%)", font=dict(size=13, color=AZUL_OSC)),
-        plot_bgcolor="white", paper_bgcolor="white",
-        xaxis_title="Variación %", yaxis_title="Ficha",
-        margin=dict(t=50,b=20,l=10,r=60), height=420,
-        showlegend=False,
+        title=dict(text=f"Variación de avalúo por rangos — predios con cambio ≥ {umbral_av}%",
+                   font=dict(size=13, color=AZUL_OSC)),
+        showlegend=True,
+        legend=dict(font=dict(color="black", size=11)),
+        margin=dict(t=50, b=0, l=0, r=0), height=420,
+        paper_bgcolor="white",
+        annotations=[dict(
+            text=f"<b>{n_extrem:,}</b><br>predios<br>≥ {umbral_av}%",
+            x=0.5, y=0.5, font_size=11, showarrow=False, font_color=AZUL_OSC,
+        )],
     )
     st.plotly_chart(fig_ext, use_container_width=True)
 
@@ -590,9 +628,15 @@ if "VAR_AVALUO_%" in cols_ext:
 st.dataframe(df_ext[cols_ext].reset_index(drop=True),
              use_container_width=True, height=360, column_config=col_cfg_ext)
 
-csv_ext = df_ext[cols_ext].to_csv(index=False).encode("utf-8-sig")
-st.download_button("⬇️ Descargar predios extremos (.csv)", data=csv_ext,
-                   file_name="girardota_cambios_extremos.csv", mime="text/csv")
+_buf_ext = io.BytesIO()
+with pd.ExcelWriter(_buf_ext, engine="openpyxl") as _w:
+    df_ext[cols_ext].to_excel(_w, index=False, sheet_name="Cambios_Extremos")
+st.download_button(
+    "⬇️ Descargar predios extremos (.xlsx)",
+    data=_buf_ext.getvalue(),
+    file_name="girardota_cambios_extremos.xlsx",
+    mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+)
 
 
 # ── SECCIÓN 7: RESUMEN POR DESTINO (TABLA COMPLETA) ─────────────────────────
@@ -705,4 +749,5 @@ st.markdown(
     "Municipio de Girardota · Predial 2026 · Ley 44/1990 Art.6 · UVT 2026: $52.374 · Límite: doble del impuesto 2025"
     "</center>", unsafe_allow_html=True,
 )
+
 
