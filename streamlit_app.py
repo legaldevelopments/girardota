@@ -564,12 +564,7 @@ df_ext = df[
 
 n_ext      = len(df_ext)
 n_ext_viol = int(df_ext["_violo"].sum())
-st.markdown(
-    f"<p style='color:#222; font-size:0.95rem;'>"
-    f"<b>{n_ext:,}</b> predios con cambio extremo · "
-    f"de estos <b>{n_ext_viol:,}</b> con liq. inicial excedió el límite.</p>",
-    unsafe_allow_html=True,
-)
+
 
 if len(df_ext) > 0:
     df_var_valid = df[df[col_var].notna()].copy()
