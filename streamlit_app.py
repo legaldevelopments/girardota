@@ -307,7 +307,7 @@ with c2:
                 "Dentro Ley 44, excede límite local",
                 "Dentro de ambos límites",
                 "No aplica límite",
-                "Predios 2026"],
+                "Nuevos 2026"],
         values=[n_violo_v, n_ok_loc_exc, n_ok_limpio, n_noapl, n_pred2026],
         hole=0.52,
         marker_colors=[ROJO, NARANJA, VERDE, AMBAR, GRIS],
