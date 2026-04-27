@@ -307,7 +307,7 @@ with c2:
                 "Dentro Ley 44, excede límite local",
                 "Dentro de ambos límites",
                 "No aplica límite",
-                "Nuevos 2026"],
+                "Predios 2026"],
         values=[n_violo_v, n_ok_loc_exc, n_ok_limpio, n_noapl, n_pred2026],
         hole=0.52,
         marker_colors=[ROJO, NARANJA, VERDE, AMBAR, GRIS],
@@ -565,8 +565,10 @@ df_ext = df[
 n_ext      = len(df_ext)
 n_ext_viol = int(df_ext["_violo"].sum())
 st.markdown(
-    f"**{n_ext:,}** predios con cambio extremo · "
-    f"de estos **{n_ext_viol:,}** con liq. inicial excedió el límite."
+    f"<p style='color:#222; font-size:0.95rem;'>"
+    f"<b>{n_ext:,}</b> predios con cambio extremo · "
+    f"de estos <b>{n_ext_viol:,}</b> con liq. inicial excedió el límite.</p>",
+    unsafe_allow_html=True,
 )
 
 if len(df_ext) > 0:
