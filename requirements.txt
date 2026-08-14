@@ -1,6 +1,17 @@
+# Análisis predial Girardota 2026
+# Instalación:  pip install -r requirements.txt
+
+# --- Lectura/escritura de las bases catastrales y del anexo Excel ---
+openpyxl>=3.1.0
+
+# --- Informe en Word (procesar_predial_girardota.py) ---
+python-docx>=1.1.0
+
+# --- Tablero Streamlit (tablero_girardota.py) ---
 streamlit>=1.32.0
 pandas>=2.0.0
-plotly>=5.18.0
 numpy>=1.26.0
-openpyxl>=3.1.0
+plotly>=5.18.0
+
+# --- Estilos de las tablas del tablero (st.dataframe .style.background_gradient) ---
 matplotlib>=3.8.0
